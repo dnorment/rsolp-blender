@@ -48,3 +48,36 @@ def set_background(filename):
     
     #Set image from filepath to background
     nodeImageTex.image = bpy.data.images.load(filename)
+
+#Import model from path
+def import_model(modelpath):
+    #import model into scene
+    modelobj = modelpath + "\\textured_meshes\\optimized_tsdf_texture_mapped_mesh.obj"
+    modelpng = modelpath + "\\textured_meshes\\optimized_tsdf_texture_mapped_mesh.png"
+    bpy.ops.import_scene.obj(filepath=modelobj)
+    
+    #TODO: set texture on model
+    
+    #resize and remove rotation
+    model = bpy.context.selected_objects[0]
+    model.scale = (4,4,4)
+    model.rotation_euler = (0,0,0)
+    
+    return model
+
+#Main render process
+def main_render(fSpyFile, imgFile, modelFile, orientation, position):
+    #import fSpy file
+    import_fSpy(fSpyFile)
+    
+    #set background to image
+    set_background(imgFile)
+    
+    #import model
+    model = import_model(modelFile)
+
+main_render(INPUT_PATH + SCENE_NAME + ".fspy", 
+            INPUT_PATH + SCENE_NAME + ".png", 
+            MODEL_PATH + MODEL_NAME, 
+            0, 
+            0)
