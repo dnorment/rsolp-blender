@@ -89,8 +89,43 @@ def import_model(modelpath):
     
     return model
 
+#Sets object ID 1 to the model for masking
+def set_mask(model):
+    model.pass_index = 1
+
+#Setup compositor for output and masks
+def setup_compositor(outputPath):
+    #Use nodes to edit render layers
+    scene = bpy.data.scenes["Scene"]
+    scene.use_nodes = True
+    
+    tree = scene.node_tree
+    nodes, links = tree.nodes, tree.links
+    
+    #Clear tree before adding all nodes
+    nodes.clear()
+    
+    #Add nodes to tree
+    node_layers = nodes.new(type="CompositorNodeRLayers")
+    node_alpha_convert = nodes.new(type="CompositorNodePremulKey")
+    node_id_mask = nodes.new(type="CompositorNodeIDMask")
+    node_id_mask.index = 1
+    node_output = nodes.new(type="CompositorNodeOutputFile")
+    
+    #Edit output location & names
+    node_output.base_path = outputPath + "\\"
+    node_output.file_slots.clear()
+    node_output.file_slots.new("Image")
+    node_output.file_slots.new("Mask")
+    
+    #Set node links
+    links.new(node_layers.outputs['Image'], node_output.inputs['Image'])
+    links.new(node_layers.outputs['IndexOB'], node_id_mask.inputs['ID value'])
+    links.new(node_id_mask.outputs['Alpha'], node_alpha_convert.inputs['Image'])
+    links.new(node_alpha_convert.outputs['Image'], node_output.inputs['Mask'])
+
 #Main render process
-def main_render(fSpyFile, imgFile, modelFile, orientation, position):
+def main_render(fSpyFile, imgFile, modelFile, outputPath, orientation, position):
     #Import fSpy file
     import_fSpy(fSpyFile)
     
@@ -99,9 +134,17 @@ def main_render(fSpyFile, imgFile, modelFile, orientation, position):
     
     #Import model
     model = import_model(modelFile)
+    
+    #Set mask on model
+    set_mask(model)
+    
+    #Setup compositor for mask image
+    setup_compositor(outputPath)
+    
 
 main_render(INPUT_PATH + SCENE_NAME + ".fspy", 
             INPUT_PATH + SCENE_NAME + ".png", 
             MODEL_PATH + MODEL_NAME, 
+            OUTPUT_PATH, 
             0, 
             0)
