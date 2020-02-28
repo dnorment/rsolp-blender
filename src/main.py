@@ -51,29 +51,53 @@ def set_background(filename):
 
 #Import model from path
 def import_model(modelpath):
-    #import model into scene
+    #Import model into scene
     modelobj = modelpath + "\\textured_meshes\\optimized_tsdf_texture_mapped_mesh.obj"
     modelpng = modelpath + "\\textured_meshes\\optimized_tsdf_texture_mapped_mesh.png"
     bpy.ops.import_scene.obj(filepath=modelobj)
     
-    #TODO: set texture on model
-    
-    #resize and remove rotation
+    #Resize and remove rotation
     model = bpy.context.selected_objects[0]
     model.scale = (4,4,4)
     model.rotation_euler = (0,0,0)
+    
+    #Add material to model
+    modelTexMat = bpy.data.materials.new(name="ModelTextureMaterial")
+    if (model.data.materials):
+        model.data.materials[0] = modelTexMat
+    else:
+        model.data.materials.append(modelTexMat)
+    
+    #Use nodes to edit material properties
+    modelTexMat.use_nodes = True
+    
+    tree = modelTexMat.node_tree
+    nodes, links = tree.nodes, tree.links
+    
+    #Clear tree before adding all nodes
+    nodes.clear()
+    
+    #Add nodes to tree
+    nodeImageTex = nodes.new(type="ShaderNodeTexImage")
+    nodeMaterialOutput = nodes.new(type="ShaderNodeOutputMaterial")
+    
+    #Set node links
+    links.new(nodeImageTex.outputs['Color'], nodeMaterialOutput.inputs['Surface'])
+    
+    #Set image from modelpath to texture
+    nodeImageTex.image = bpy.data.images.load(modelpng)
     
     return model
 
 #Main render process
 def main_render(fSpyFile, imgFile, modelFile, orientation, position):
-    #import fSpy file
+    #Import fSpy file
     import_fSpy(fSpyFile)
     
-    #set background to image
+    #Set background to image
     set_background(imgFile)
     
-    #import model
+    #Import model
     model = import_model(modelFile)
 
 main_render(INPUT_PATH + SCENE_NAME + ".fspy", 
