@@ -113,7 +113,7 @@ def setup_compositor(outputPath):
     node_output = nodes.new(type="CompositorNodeOutputFile")
     
     #Edit output location & names
-    node_output.base_path = outputPath + "\\"
+    node_output.base_path = outputPath
     node_output.file_slots.clear()
     node_output.file_slots.new("Image")
     node_output.file_slots.new("Mask")
