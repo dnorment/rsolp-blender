@@ -40,19 +40,31 @@ for scene in scenes:
 
     #Write many JSON files with random x/y in bounds
     for f in range(num):
-        loc = {
+        info = {
             "x" : random.uniform(bounds['xmin'], bounds['xmax']),
             "y" : random.uniform(bounds['ymin'], bounds['ymax']),
-            "model" : model_name
+            "model" : model_name,
+            "scene" : scene
         }
         with open("./input/" + scene + "/" + scene + "-" + model_name + "-" + uuid.uuid4().hex + ".json", "w") as outfile:
-                outfile.write(json.dumps(loc, indent=4))
+                outfile.write(json.dumps(info, indent=4))
                 outfile.close()
 
-#Run through input and get list of absolute paths for each input JSON
-input_files = []
-for root, dirs, files in os.walk("./input"):
-    for file in files:
-        if file.endswith('.json') and root != "./input":
-            input_files.append(os.path.abspath(os.path.join(root, file)))
+#Render the frames with given input data from each JSON file
+for scene in scenes:
+    #Get list of input JSON files in scene's input folder
+    input_files = []
+    for root, dirs, files in os.walk("./input/" + scene):
+        for file in files:
+            if file.endswith('.json'):
+                input_files.append(os.path.abspath(os.path.join(root, file)))
 
+    #Render using info from each JSON
+    for jsonfile in input_files:
+        #Run the main rendering process script
+        subprocess.run([BLENDER_PATH,
+                        "--background",
+                        SCENES_PATH + scene + ".blend",
+                        "--python",
+                        ROOT_PATH + "render.py",
+                        "--debug-value", jsonfile])
