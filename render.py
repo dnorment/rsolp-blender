@@ -3,12 +3,9 @@ import json
 import sys
 from pathlib import Path
 
-#Set renderer to Cycles Render for shadow catching feature and use GPU as rendering device
-bpy.context.scene.render.engine = 'CYCLES'
-bpy.context.scene.cycles.device = 'GPU'
-
 #Setup paths
 JSON_PATH = sys.argv[-1]
+JSON_NAME = JSON_PATH[:-5].split("\\")[-1].split("/")[-1]
 ROOT_PATH = str(Path(JSON_PATH).parent.parent.parent)
 MODEL_PATH = ROOT_PATH + "/models"
 OUTPUT_PATH = ROOT_PATH + "/output"
@@ -86,7 +83,7 @@ def set_mask(model, index):
     model.pass_index = index
 
 #Set compositor using info from json
-def setup_compositor(outputPath):
+def setup_compositor(outputPath, sceneName):
     #Use nodes to edit render layers
     scene = bpy.data.scenes["Scene"]
     scene.use_nodes = True
@@ -105,22 +102,27 @@ def setup_compositor(outputPath):
     node_output = nodes.new(type="CompositorNodeOutputFile")
     
     #Edit output location & names
-    node_output.base_path = outputPath
+    node_output.base_path = outputPath + "/" + sceneName
     node_output.file_slots.clear()
-    node_output.file_slots.new("Image")
-    node_output.file_slots.new("Mask")
+    node_output.file_slots.new(JSON_NAME + "-image-")
+    node_output.file_slots.new(JSON_NAME + "-mask-")
     
     #Set node links
-    links.new(node_layers.outputs['Image'], node_output.inputs['Image'])
+    links.new(node_layers.outputs['Image'], node_output.inputs[0])
     links.new(node_layers.outputs['IndexOB'], node_id_mask.inputs['ID value'])
     links.new(node_id_mask.outputs['Alpha'], node_alpha_convert.inputs['Image'])
-    links.new(node_alpha_convert.outputs['Image'], node_output.inputs['Mask'])
+    links.new(node_alpha_convert.outputs['Image'], node_output.inputs[1])
 
 #Move model to the given x/y
 def move_model(model, x, y):
-    pass
+    model.location.x = x
+    model.location.y = y
 
 if __name__ == "__main__":
+    #Set renderer to Cycles Render for shadow catching feature and use GPU as rendering device
+    bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.scene.cycles.device = 'GPU'
+
     #Load info from JSON file
     loc = {}
     modelname = ""
@@ -148,7 +150,7 @@ if __name__ == "__main__":
     set_mask(model, 1)
 
     #Set compositor
-    setup_compositor(OUTPUT_PATH + "/" + scenename)
+    setup_compositor(OUTPUT_PATH, scenename)
 
     #Render
     bpy.ops.render.render(use_viewport=False)
