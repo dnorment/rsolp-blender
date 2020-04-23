@@ -10,6 +10,10 @@ ROOT_PATH = str(Path(JSON_PATH).parent.parent.parent)
 MODEL_PATH = ROOT_PATH + "/models"
 OUTPUT_PATH = ROOT_PATH + "/output"
 
+#Config object properties
+OBJ_SCALE = 4
+OBJ_ROT = 0
+
 #Import model
 def import_model(modelpath):
     #Import model into scene
@@ -19,8 +23,8 @@ def import_model(modelpath):
     
     #Resize and remove rotation
     model = bpy.context.selected_objects[0]
-    model.scale = (4,4,4)
-    model.rotation_euler = (0,0,0)
+    model.scale = (OBJ_SCALE,OBJ_SCALE,OBJ_SCALE)
+    model.rotation_euler = (OBJ_ROT,OBJ_ROT,OBJ_ROT)
     
     #Add material to model
     modelTexMat = bpy.data.materials.new(name="ModelTextureMaterial")
