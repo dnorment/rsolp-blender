@@ -6,7 +6,6 @@ import random
 import uuid
 
 from bpy_extras.object_utils import world_to_camera_view
-from mathutils import Vector
 
 #Check if given point is (mostly) inside the field of view of the camera
 def check_in_view(x, y, z):
@@ -22,6 +21,7 @@ def check_in_view(x, y, z):
 
     #Get matrix & world data from object
     obj = bpy.data.objects['Icosphere']
+    obj.scale = (0.5, 0.5, 0.5)
     mesh = obj.data
     mat_world = obj.matrix_world
     cs, ce = cam.data.clip_start, cam.data.clip_end

@@ -3,16 +3,16 @@ import json
 import sys
 from pathlib import Path
 
+#Config object properties
+OBJ_SCALE = 8
+OBJ_ROT = 0
+
 #Setup paths
 JSON_PATH = sys.argv[-1]
 JSON_NAME = JSON_PATH[:-5].split("\\")[-1].split("/")[-1]
 ROOT_PATH = str(Path(JSON_PATH).parent.parent.parent)
 MODEL_PATH = ROOT_PATH + "/models"
 OUTPUT_PATH = ROOT_PATH + "/output"
-
-#Config object properties
-OBJ_SCALE = 4
-OBJ_ROT = 0
 
 #Import model
 def import_model(modelpath):
@@ -148,7 +148,10 @@ if __name__ == "__main__":
     move_model(model, loc["x"], loc["y"])
 
     #Set background
-    set_background(ROOT_PATH + "/input/" + scenename + ".png")
+    try:
+        set_background(ROOT_PATH + "/input/" + scenename + ".png")
+    except:
+        set_background(ROOT_PATH + "/input/" + scenename + ".jpg")
 
     #Set mask
     set_mask(model, 1)
