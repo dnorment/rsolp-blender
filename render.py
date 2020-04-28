@@ -6,6 +6,7 @@ from pathlib import Path
 #Config object properties
 OBJ_SCALE = 8
 OBJ_ROT = 0
+OBJ_VOFFSET = 0
 
 #Setup paths
 JSON_PATH = sys.argv[-1]
@@ -121,6 +122,7 @@ def setup_compositor(outputPath, sceneName):
 def move_model(model, x, y):
     model.location.x = x
     model.location.y = y
+    model.location.z = OBJ_VOFFSET
 
 if __name__ == "__main__":
     #Set renderer to Cycles Render for shadow catching feature and use GPU as rendering device
